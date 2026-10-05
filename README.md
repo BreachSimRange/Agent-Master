@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.png" alt="Agent-Master" width="100%">
+</p>
+
 # Agent-Master
 
 Agent-Master is a self-hosted **workspace manager for AI coding agents**. Agent-Master does not run or direct the
@@ -104,18 +108,71 @@ Works over the SSH tunnel or a VPN the same way.
 
 ## Quickstart
 
+Linux with systemd, Python 3.11+, and Claude Code installed and signed in for the same user (see
+[Requirements](#requirements)). Run the steps in this order.
+
+**1. Get the code and install the Python packages.**
+
 ```sh
 git clone https://github.com/BreachSimRange/Agent-Master.git ~/agent-master
-cd ~/agent-master && pip install -r requirements.txt   # if pip refuses (PEP 668): add --break-system-packages
-./install.sh                 # writes and starts the systemd user services (terminal server, web app, VS Code if installed)
+cd ~/agent-master
+pip install -r requirements.txt            # if pip refuses (PEP 668 on Kali/Debian 12+/Ubuntu 23.04+): add --break-system-packages
 ```
 
-Then open `http://127.0.0.1:3000/` on the same machine. The first visitor creates the account with
-the setup token printed in the log (`journalctl --user -u agent-master`). The console command is
-`~/.local/bin/agent-master`, which `install.sh` links for you.
+**2. (Optional) Install VS Code, for editing workspaces in the browser.** Agent-Master serves the
+*real* VS Code, so the `code` command must be on your `PATH` before step 3. Skip this if you do not
+want the in-browser editor.
 
-Without systemd, for a look: `./run.sh` starts the web app in the foreground and needs the terminal
-server running (`python3 ptyd.py`) in another shell.
+```sh
+# Debian / Kali / Ubuntu (official Microsoft repo); or download from https://code.visualstudio.com
+sudo apt-get install -y wget gpg
+sudo mkdir -p /etc/apt/keyrings
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/keyrings/packages.microsoft.gpg >/dev/null
+echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
+sudo apt-get update && sudo apt-get install -y code
+code --version                             # confirm `code` is on the PATH
+```
+
+**3. Sign in to Claude Code**, as the same user that will run the services. Agent-Master does not
+manage this login: each agent runs the real `claude` binary and inherits its account. If Claude Code
+is not installed yet, install it first (see [Anthropic's docs](https://docs.anthropic.com/en/docs/claude-code)),
+then sign in once:
+
+```sh
+claude      # the first run walks you through sign-in: a Claude Pro/Max subscription or an Anthropic Console account
+```
+
+Credentials are saved in `~/.claude/` and every workspace reuses them; you can set `ANTHROPIC_API_KEY`
+instead. Plain shells (the eggs) need no Claude login - only Claude agents do.
+
+**4. Install and start the services.** Run this as your **normal user, not with `sudo`**: these are
+systemd *user* services that live under your home directory and run as you, never as root. (Only the
+VS Code install in step 2 needs `sudo`.)
+
+```sh
+./install.sh                 # add --no-code to skip the editor service
+```
+
+`install.sh` writes and starts the systemd **user** services in the right order: the terminal server
+(`agent-masterd`) first, then the web app (`agent-master`), then VS Code in the browser
+(`agent-master-code`) when `code` is installed. It also links the `agent-master` console command to
+`~/.local/bin/` and enables linger so everything survives a reboot. Installed VS Code later? Just
+re-run `./install.sh` and it adds the editor service.
+
+**5. Open it and create the account.** Open `http://127.0.0.1:3000/` on the same machine. The first
+visitor creates the account with the setup token printed in the log:
+
+```sh
+journalctl --user -u agent-master | grep 'setup token'
+```
+
+**Without systemd (just to try it).** `run.sh` starts **only** the web app, so you must start the
+terminal server yourself first, in its own shell, or the UI comes up with "terminal server offline":
+
+```sh
+python3 ptyd.py              # terminal server (agent-masterd); leave this running
+./run.sh                     # in another shell: the web app on http://127.0.0.1:3000/
+```
 
 From another device, use one of the three supported paths in [Access the UI safely](docs/access.md);
 HTTPS on your own hostname over the home LAN, a tailnet or a VPN is the usual one:
@@ -213,25 +270,28 @@ action: [Using it](docs/using.md).
   (a signed-in operator has a shell anyway; the rule keeps the address bar from being a shortcut). `~/.config/agent-master/`
   is mode 700, files 600; the terminal server has no TCP port, only an owner-only Unix socket.
 
-> **Never expose Agent-Master directly to the internet:** A signed-in operator has a shell, an editor
+> [!CAUTION]
+> **Never expose Agent-Master directly to the internet.** A signed-in operator has a shell, an editor
 > and every agent on the machine, so the account password would be the only thing between the
 > internet and your computer. No router port forwarding, no public reverse proxy, no Tailscale Funnel
 > or Cloudflare Tunnel, no `--host 0.0.0.0` on a machine with a public address.
->
-> **Recommended: a private network you control, plus the root certificate on every device:** Put the
+
+> [!TIP]
+> **Recommended: a private network you control, plus the root certificate on every device.** Put the
 > machine and your devices on a tailnet (Tailscale) or your own WireGuard VPN, serve HTTPS with the
 > certificate from `make-cert.sh`, and install its root certificate on each phone, tablet and laptop
 > that will use the UI. Then only your devices can reach the port at all, every connection is
 > encrypted end to end, and a device without the root certificate cannot be tricked by a look-alike
 > server. The SSH tunnel is the equally safe choice for a single laptop.
->
-> **Do not use it over public or untrusted Wi-Fi without that root certificate:** On a hotel, cafe,
+
+> [!WARNING]
+> **Do not use it over public or untrusted Wi-Fi without that root certificate.** On a hotel, cafe,
 > airport or office network, a plain `--host 0.0.0.0` instance or a browser that clicked through a
 > certificate warning can be intercepted. With the VPN or tunnel up and the root certificate
 > installed, an untrusted network underneath does not matter.
->
-> The sign-in, lockout and origin checks are a second lock, not a reason to open the door. There are
-> exactly three supported ways in.
+
+The sign-in, lockout and origin checks are a second lock, not a reason to open the door. There are
+exactly three supported ways in.
 
 The three supported ways in, with commands: [Access the UI safely](docs/access.md).
 
