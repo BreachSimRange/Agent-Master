@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.log
+agent-master-rootCA.pem
+*.pem
+*.key
+.venv/
+venv/
+.DS_Store

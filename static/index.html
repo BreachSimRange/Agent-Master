@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent-Master</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%231c2033'/%3E%3Crect x='4' y='2' width='8' height='3' fill='%233b2418'/%3E%3Crect x='4' y='5' width='8' height='4' fill='%23e6b894'/%3E%3Crect x='5' y='6' width='2' height='2' fill='%231a1a1a'/%3E%3Crect x='9' y='6' width='2' height='2' fill='%231a1a1a'/%3E%3Crect x='3' y='9' width='10' height='5' fill='%234a9a6a'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/vendor/xterm.css">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="layout">
+  <div class="actbar">
+    <div class="actbar-btn active" id="act-office" title="Office"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/></svg></div>
+    <div class="actbar-btn" id="act-log" title="Event log"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
+    <div class="actbar-btn" id="act-palette" title="Search / commands (Ctrl+K)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg></div>
+    <div class="actbar-btn" id="act-new" title="New workspace"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="actbar-btn" id="act-refresh" title="Refresh state"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg></div>
+    <div class="actbar-spacer"></div>
+    <div class="actbar-btn" id="act-bell" title="Recent events"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="badge" id="bell-badge" hidden></span></div>
+    <div class="actbar-btn" id="act-theme" title="Light / dark theme"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></div>
+    <div class="actbar-btn" id="act-logout" title="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h5"/><path d="M15 8l4 4-4 4M19 12H9"/></svg></div>
+    <div class="actbar-btn" id="act-settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></div>
+  </div>
+  <div class="notif-pop" id="notif-pop" hidden>
+    <div class="notif-head"><span>Recent events</span><span class="modal-close" id="notif-clear" title="Clear">clear</span></div>
+    <div id="notif-list"></div>
+  </div>
+
+  <div class="editor-area">
+    <div class="tabs">
+      <div class="tab-item active" id="tab-office" hidden>office</div>
+      <div class="tab-item" id="tab-log" hidden>log</div>
+      <div class="strip" id="strip"><span class="strip-tag">Agent-Master, hacked together by Abx.</span><span class="strip-agent" id="strip-agent"></span><span class="strip-counts" id="strip-counts"></span><span class="strip-spacer"></span></div>
+      <div class="tabs-right">
+        <div class="icon-btn" id="btn-layout" title="Office on the right / office on top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M12 4v16"/></svg></div>
+        <div class="icon-btn on" id="btn-attn" title="Toggle attention panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg><span class="badge" id="attn-badge" hidden></span></div>
+        <div class="icon-btn on" id="btn-side" title="Toggle the left bar (Ctrl+B)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M9 4v16"/></svg></div>
+        <div class="icon-btn on" id="btn-office" title="Toggle office (Ctrl+J)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 11h18"/></svg></div>
+        <button class="view-toggle" id="ribbon-edit" hidden title="Open this workspace's folder in VS Code, in a new tab">Edit with VS Code</button>
+        <button class="view-toggle" id="view-toggle" hidden>conversation</button>
+        <span id="tb-user" class="tb-user"></span><button class="tb-logout" id="tb-logout" title="Sign out of Agent-Master">sign out</button>
+      </div>
+    </div>
+    <div class="editor-split" id="split">
+      <div class="office-wrap" id="office-wrap">
+        <div class="office-stage" id="stage">
+          <canvas id="office"></canvas>
+          <div id="labels"></div>
+          <div id="balloons"></div>
+        </div>
+        <div class="toasts" id="toasts"></div>
+        <div class="office-empty" id="office-empty" hidden>no agents yet: press + to start onene</div>
+      </div>
+      <div class="log-view" id="log-view" hidden>
+        <div class="log-bar">
+          <select id="log-since"><option value="3600">last hour</option><option value="86400" selected>last 24 h</option><option value="604800">last 7 days</option><option value="0">all</option></select>
+          <select id="log-ws"><option value="">all workspaces</option></select>
+          <select id="log-kind"><option value="">all events</option><option value="status">status</option><option value="prompt">prompt</option><option value="visit">visit</option><option value="chat">lounge chat</option><option value="workspace_created">opened</option><option value="workspace_closed">closed</option><option value="agent_started">agent started</option><option value="agent_gone">agent gone</option></select>
+          <button id="log-refresh">refresh</button>
+          <span class="log-note" id="log-note"></span>
+        </div>
+        <div class="log-body">
+          <table class="log-table" id="log-summary"></table>
+          <table class="log-table" id="log-events"></table>
+        </div>
+      </div>
+      <div class="sash-h" id="sash-h" title="Drag to resize office / terminal"></div>
+      <div class="attention" id="attention"><div id="attn-list"></div></div>
+      <div class="terminal-area">
+        <div class="term-tabs" id="term-tabs"></div>
+        <div class="pane-chips" id="pane-chips" hidden></div>
+        <div class="chat" id="chat" hidden><button class="chat-older" id="chat-older" hidden>load older</button><div class="chat-log" id="chat-log"></div><div class="chat-status" id="chat-status"></div><div class="chat-compose" id="chat-compose"><div class="cc-box"><span class="cc-gt">❯</span><textarea id="chat-input" rows="1" placeholder="" spellcheck="false"></textarea></div><div class="cc-hint" id="chat-hint"></div></div></div>
+          <div class="term-grid" id="term-grid"></div>
+        <div class="transcript" id="transcript" hidden>
+          <div class="transcript-bar"><span id="transcript-title">history</span><span class="transcript-note" id="transcript-note"></span><button id="transcript-older" hidden>load older</button><button id="transcript-refresh">refresh</button><button id="transcript-close">back to terminal</button></div>
+          <div class="transcript-body" id="transcript-body"></div>
+        </div>
+        <div class="input-bar">
+          <div class="quick-keys" id="quick-keys">
+            <button data-seq="\r">Enter</button><button data-seq="\u001b">Esc</button><button data-seq="\u0003">Ctrl+C</button>
+            <button data-seq="\t">Tab</button><button data-seq="\u001b[Z">Shift+Tab</button><button data-seq="\u001b[A">↑</button><button data-seq="\u001b[B">↓</button>
+            <button data-seq="y\r">y</button><button data-seq="n\r">n</button>
+          </div>
+          <div class="prompt-wrap" id="prompt-wrap">
+            <input id="prompt" type="text" placeholder="prompt for the selected agent · Enter to send · ↑ history" autocomplete="off" spellcheck="false">
+            <button id="tpl-btn" title="Templates">tpl ▾</button>
+            <div class="tpl-menu" id="tpl-menu" hidden></div>
+          </div>
+          <button id="send" title="Send with Enter">send</button>
+          <button id="more" title="History, VS Code, split view, broadcast, focus mode">⋯</button>
+          <div class="tpl-menu more-menu" id="more-menu" hidden></div>
+          <!-- the actions behind the ⋯ menu keep their buttons (other code toggles them); the menu is what you see -->
+          <button id="history" class="menu-only" title="Full conversation history as a page, with load older">history</button>
+          <button id="edit" class="menu-only" hidden title="Open this workspace's folder in VS Code, in a new tab">Edit with VS Code</button>
+          <button id="pin-term" class="menu-only" title="Keep this terminal open next to the others (split view)">split view</button>
+          <button id="broadcast" class="menu-only" title="Send one prompt to several agents">broadcast</button>
+          <button id="focus-term" class="menu-only" title="Give the terminal the whole window (Ctrl+Shift+F)">focus mode</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="statusbar">
+  <span id="sb-conn" class="conn">connecting</span>
+  <span id="sb-version"></span>
+  <span class="btn" id="sb-side">⌥ bar</span><span class="btn" id="sb-office">⌥ office</span>
+  <span class="sb-center"><a href="https://breachsimrange.io" target="_blank" rel="noopener noreferrer">With love to the community from https://breachsimrange.io</a></span>
+  <div class="statusbar-right"><span id="sb-limits" title="Claude usage limits, as Claude Code reports them"></span><span id="sb-counts"></span><span id="sb-clock"></span></div>
+</div>
+
+<!-- settings -->
+<div class="modal-backdrop" id="settings" hidden>
+  <div class="modal">
+    <div class="modal-head"><span>Settings</span><span class="modal-close" data-close="settings" title="Close">✕</span></div>
+    <div class="modal-section">
+      <div class="modal-title">Access</div>
+      <p class="modal-note" id="auth-note">Everyone who opens this address must sign in.</p>
+      <form id="pw-form">
+        <label for="pw-user">Username</label><input id="pw-user" type="text" autocomplete="username" autocapitalize="off" spellcheck="false">
+        <label for="pw-current">Current password (required)</label><input id="pw-current" type="password" autocomplete="current-password">
+        <label for="pw-new">New password (leave empty to keep)</label><input id="pw-new" type="password" autocomplete="new-password">
+        <label for="pw-confirm">Confirm new password</label><input id="pw-confirm" type="password" autocomplete="new-password">
+        <div class="modal-row"><button type="submit" class="primary">Save</button><span class="modal-msg" id="pw-msg"></span></div>
+      </form>
+      <div class="modal-row" style="margin-top:14px"><button id="logout">Sign out</button><button id="logout-all" title="Also signs out every other browser">Sign out everywhere</button></div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-title">Notifications</div>
+      <label class="check"><input type="checkbox" id="opt-notify-blocked"> Browser notification when an agent is blocked</label>
+      <label class="check"><input type="checkbox" id="opt-notify-done"> Browser notification when an agent is done</label>
+      <label class="check"><input type="checkbox" id="opt-sound"> Sound in the office on blocked / done</label>
+      <p class="modal-note" id="notify-note"></p>
+    </div>
+    <div class="modal-section">
+      <div class="modal-title">Prompt templates</div>
+      <p class="modal-note">One per line: <code>name | prompt text</code>. Available from the "tpl" button next to the prompt box on every device.</p>
+      <textarea id="tpl-edit" rows="5" spellcheck="false"></textarea>
+      <div class="modal-row"><button id="tpl-save" class="primary">Save templates</button><span class="modal-msg" id="tpl-msg"></span></div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-title">Office chatter</div>
+      <p class="modal-note">Resting agents talk to each other. With Claude, each exchange is written from a briefing of what is really happening (their transcripts, who is blocked, recent events). Uses the Anthropic API when <code>ANTHROPIC_API_KEY</code> is set, otherwise Claude Code on this machine, otherwise built-in lines.</p>
+      <div class="cs-grid">
+        <label for="chat-mode">Mode</label><select id="chat-mode"><option value="auto">Claude when available, else built-in</option><option value="builtin">built-in lines only (free)</option><option value="off">off</option></select>
+        <label for="chat-model">Model</label><select id="chat-model"><option value="claude-opus-5">claude-opus-5</option><option value="claude-sonnet-5">claude-sonnet-5</option><option value="claude-haiku-4-5">claude-haiku-4-5 (cheapest)</option></select>
+        <label for="chat-interval">Min. seconds between Claude calls</label><input id="chat-interval" type="number" min="20" max="3600" step="5">
+      </div>
+      <p class="modal-note" id="chat-status"></p>
+      <div class="modal-row"><button id="chat-save" class="primary">Save chatter settings</button><span class="modal-msg" id="chat-msg"></span></div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-title">Appearance</div>
+      <label class="check"><input type="checkbox" id="opt-light"> Light theme</label>
+      <label class="check"><input type="checkbox" id="opt-prompt" checked> Prompt box under the terminal (type a whole prompt with history and templates, or broadcast it)</label>
+      <label for="opt-termfit">When a console last used a terminal that is wider than this screen</label>
+      <select id="opt-termfit">
+        <option value="keep">Keep the normal text size here and scroll to the rest (default)</option>
+        <option value="shrink">Shrink the text here so the console's full width fits (extra rows scroll)</option>
+      </select>
+      <p class="modal-note">A terminal is the size of whoever is using it: opening it here changes nothing, typing here takes this screen's size, opening or typing in the console takes it back. Per device.</p>
+    </div>
+    <div class="modal-section">
+      <div class="modal-title">Server</div>
+      <div id="settings-server" class="kv-grid"></div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-title">About</div>
+      <p class="modal-note">Agent-Master by Abx · headless AI coding agents in a pixel office. Ctrl+K search, Ctrl+B left bar, Ctrl+J office. Right-click a character for actions; drag one onto a desk to assign the seat.</p>
+    </div>
+  </div>
+</div>
+
+<!-- new workspace -->
+<div class="agent-card" id="agent-card" hidden>
+  <div class="ac-head"><span class="tree-dot" id="ac-dot"></span><span id="ac-name"></span><span class="ac-x" id="ac-x" title="Close">✕</span></div>
+  <div class="ac-body" id="ac-body"></div>
+  <div class="ac-actions"><button id="ac-open">terminal</button><button id="ac-history">history</button><button id="ac-edit" hidden title="Open this workspace's folder in VS Code, in a new tab">Edit with VS Code</button><button id="ac-costume">costume</button><button id="ac-pinsize" hidden title="Pin this terminal to a fixed size so it stays the same shape across desktop, phone and console — no more reflow when a new viewer connects">pin size</button><button id="ac-prevsess" hidden title="This terminal's session id changed (a resume that could not find its transcript starts a new chat). Go back to the previous session: Claude Code is restarted with --resume on it">previous session</button><button id="ac-adopt" hidden title="Resume this Claude Code session in a real terminal run by Agent-Master">move to terminal</button></div>
+</div>
+<div class="modal-backdrop" id="confirm" hidden>
+  <div class="modal confirm-modal">
+    <div class="modal-head"><span id="confirm-title">Confirm</span><span class="modal-close" id="confirm-x">close</span></div>
+    <div class="modal-section"><div class="modal-note" id="confirm-text"></div>
+      <div class="modal-row"><button class="btn danger" id="confirm-ok">Close workspace</button><button class="btn" id="confirm-cancel">Cancel</button></div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" id="newws" hidden>
+  <div class="modal">
+    <div class="modal-head"><span>New workspace</span><span class="modal-close" data-close="newws" title="Close">✕</span></div>
+    <div class="modal-section">
+      <label for="nw-path">Directory</label>
+      <div class="modal-row" style="margin-top:0"><input id="nw-path" type="text" value="~" spellcheck="false" style="flex:1"><button id="nw-up">up</button></div>
+      <div class="dir-list" id="nw-dirs"></div>
+      <label for="nw-label">Label</label><input id="nw-label" type="text" placeholder="defaults to the folder name">
+      <label for="nw-agent">Start</label>
+      <select id="nw-agent"><option value="claude">Claude Code</option><option value="codex">codex</option><option value="gemini">gemini</option><option value="">just a shell</option><option value="custom">custom command…</option></select>
+      <input id="nw-custom" type="text" placeholder="command to run" hidden>
+      <div id="nw-claude-opts"><label for="nw-model">Model</label><select id="nw-model"><option value="">default (from your Claude Code settings)</option><option value="claude-opus-5">claude-opus-5</option><option value="claude-sonnet-5">claude-sonnet-5</option><option value="claude-haiku-4-5-20251001">claude-haiku-4-5</option></select>
+      <label for="nw-resume">Conversation</label><select id="nw-resume" title="A folder that already has Claude Code conversations opens with its latest one, history included; pick another or start a new one"><option value="">start a new conversation</option></select>
+      <label for="nw-perm">Permissions</label><select id="nw-perm"><option value="">ask for every write and command (default)</option><option value="acceptEdits">accept file edits, ask for commands</option><option value="plan">plan mode</option><option value="bypassPermissions">run all commands without asking (bypass — trusted folders only)</option></select></div>
+      <label class="check"><input type="checkbox" id="nw-headless"> Headless (no terminal): Claude Code driven through its JSON interface instead</label>
+      <div class="modal-row"><button id="nw-create" class="primary">Create</button><span class="modal-msg" id="nw-msg"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- broadcast -->
+<div class="modal-backdrop" id="bcast" hidden>
+  <div class="modal">
+    <div class="modal-head"><span>Broadcast a prompt</span><span class="modal-close" data-close="bcast" title="Close">✕</span></div>
+    <div class="modal-section">
+      <div class="check-list" id="bc-list"></div>
+      <label for="bc-text">Prompt</label><textarea id="bc-text" rows="3" spellcheck="false"></textarea>
+      <div class="modal-row"><button id="bc-send" class="primary">Send to selected</button><button id="bc-idle">select idle</button><button id="bc-all">select all</button><span class="modal-msg" id="bc-msg"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- costume -->
+<div class="modal-backdrop" id="costume" hidden>
+  <div class="modal">
+    <div class="modal-head"><span id="cs-title">Costume</span><span class="modal-close" data-close="costume" title="Close">✕</span></div>
+    <div class="modal-section">
+      <div class="cs-grid">
+        <label>Style</label><select id="cs-gender"><option value="f">dress</option><option value="m">trousers</option></select>
+        <label>Hair</label><select id="cs-hair-style"></select>
+        <label>Hair colour</label><input id="cs-hair" type="color">
+        <label>Shirt</label><input id="cs-shirt" type="color">
+        <label>Skin</label><input id="cs-skin" type="color">
+        <label>Desk</label><select id="cs-desk"></select>
+      </div>
+      <div class="modal-row"><button id="cs-save" class="primary">Save</button><button id="cs-reset">Reset to default</button><span class="modal-msg" id="cs-msg"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- command palette -->
+<div class="palette-backdrop" id="palette" hidden>
+  <div class="palette">
+    <input id="palette-input" type="text" placeholder="workspace name, 'blocked', 'done', or a command…" autocomplete="off" spellcheck="false">
+    <div class="palette-list" id="palette-list"></div>
+  </div>
+</div>
+
+<div class="ctx-menu" id="ctx" hidden></div>
+
+<script src="/static/vendor/xterm.js"></script>
+<script src="/static/vendor/addon-serialize.js"></script>
+<script src="/static/vendor/addon-webgl.js"></script>
+<script src="/static/chat.js"></script>
+<script src="/static/vendor/addon-fit.js"></script>
+<script src="/static/office.js"></script>
+<script src="/static/terminal.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

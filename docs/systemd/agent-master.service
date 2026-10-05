@@ -1,0 +1,15 @@
+[Unit]
+Description=Agent-Master
+After=default.target agent-masterd.service
+Wants=agent-masterd.service
+
+[Service]
+WorkingDirectory=%h/agent-master
+ExecStart=%h/agent-master/run.sh --tunnel-only
+# LAN access over HTTPS by hostname (after ./make-cert.sh myhost), instead of the SSH tunnel:
+# ExecStart=%h/agent-master/run.sh --host :: --cert %h/.config/agent-master/lan-cert.pem --key %h/.config/agent-master/lan-key.pem --allowed-host myhost --allowed-host myhost.local
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target

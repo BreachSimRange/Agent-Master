@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent-Master</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%231c2033'/%3E%3Crect x='4' y='2' width='8' height='3' fill='%233b2418'/%3E%3Crect x='4' y='5' width='8' height='4' fill='%23e6b894'/%3E%3Crect x='5' y='6' width='2' height='2' fill='%231a1a1a'/%3E%3Crect x='9' y='6' width='2' height='2' fill='%231a1a1a'/%3E%3Crect x='3' y='9' width='10' height='5' fill='%234a9a6a'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="login-body">
+<div class="login-card">
+  <div class="login-art">
+    <canvas id="login-scene" width="176" height="112"></canvas>
+    <div class="login-brand">
+      <div class="login-name">Agent-Master</div>
+      <div class="login-tag">Agent-Master, hacked together by Abx.</div>
+    </div>
+  </div>
+  <form class="login-form" id="form" autocomplete="on">
+    <h1 id="heading">Sign in</h1>
+    <p id="intro">Enter the username and password for this office.</p>
+    <label for="user">Username</label>
+    <input id="user" name="username" type="text" autocomplete="username" autocapitalize="off" spellcheck="false" autofocus>
+    <label for="pw">Password</label>
+    <input id="pw" name="password" type="password" autocomplete="current-password">
+    <div id="confirm-row" hidden>
+      <label for="pw2">Confirm password</label>
+      <input id="pw2" type="password" autocomplete="new-password">
+    </div>
+    <div id="token-row" hidden>
+      <label for="token">Setup token (printed in the server log)</label>
+      <input id="token" type="text" autocomplete="off" spellcheck="false">
+    </div>
+    <button id="go" type="submit" class="primary">Sign in</button>
+    <div class="login-err" id="err" role="alert"></div>
+    <div class="login-foot"><span id="foot"></span><span id="caps" hidden>Caps Lock is on</span></div>
+    <div class="login-attrib">
+      <span class="login-attrib-love">With love to the community from <a href="https://breachsimrange.io" target="_blank" rel="noopener noreferrer">breachsimrange.io</a></span>
+    </div>
+  </form>
+</div>
+<script src="/static/login.js"></script>
+</body>
+</html>

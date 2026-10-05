@@ -1,0 +1,17 @@
+[Unit]
+Description=Agent-Master terminal server (agent-masterd)
+After=default.target
+
+[Service]
+WorkingDirectory=%h/agent-master
+ExecStart=/usr/bin/python3 %h/agent-master/ptyd.py
+ExecReload=/bin/kill -USR1 $MAINPID
+Environment=PATH=%h/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Restart=always
+RestartSec=2
+# only the daemon itself is signalled on stop; it hangs up its terminals and saves their sessions first
+KillMode=mixed
+TimeoutStopSec=10
+
+[Install]
+WantedBy=default.target

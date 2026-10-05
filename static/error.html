@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{status}} · Agent-Master</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .err-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg, #1e1e1e); color: var(--fg, #ccc); font-family: var(--mono, ui-monospace, monospace); padding: 24px 16px; box-sizing: border-box; }
+  .err-card { display: flex; align-items: center; gap: 64px; max-width: 800px; width: 100%; }
+  .err-char { flex: 0 0 auto; position: relative; width: 208px; height: 234px; margin-top: 44px; }
+  .err-char svg { width: 208px; height: 234px; shape-rendering: crispEdges; image-rendering: pixelated; display: block; }
+  .err-bubble { position: absolute; left: 118px; top: -50px; background: #fff; color: #1a1c2a; font: 900 34px/1 var(--mono, monospace); padding: 12px 18px; border: 3px solid #1a1c2a; box-shadow: 4px 4px 0 #1a1c2a; letter-spacing: 1px; white-space: nowrap; }
+  .err-bubble::after { content: ''; position: absolute; left: 6px; bottom: -14px; border: 8px solid transparent; border-top-color: #1a1c2a; border-right-color: #1a1c2a; }
+  .err-bubble::before { content: ''; position: absolute; left: 9px; bottom: -8px; border: 6px solid transparent; border-top-color: #fff; border-right-color: #fff; z-index: 1; }
+  .err-text { flex: 1; min-width: 0; }
+  .err-code { font: 700 64px/1 var(--mono, monospace); color: #f14c4c; letter-spacing: -2px; }
+  .err-title { font: 700 20px/1.3 var(--mono, monospace); margin: 12px 0 8px; color: #fff; }
+  .err-detail { font: 13px/1.5 var(--mono, monospace); color: var(--fg-dim, #999); }
+  .err-links { margin-top: 22px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .err-links a { font: 12px var(--mono, monospace); color: #fff; background: var(--accent, #0e639c); text-decoration: none; padding: 7px 14px; border: 1px solid var(--accent, #0e639c); }
+  .err-links a.plain { background: transparent; color: var(--fg, #ccc); border-color: var(--border, #3c3c3c); }
+  .err-foot { margin-top: 26px; font: 11px var(--mono, monospace); color: var(--fg-muted, #6a6a6a); }
+  @media (max-width: 640px) { .err-card { flex-direction: column; gap: 24px; text-align: center; } .err-links { justify-content: center; } .err-char { transform: scale(0.8); margin: -20px 0; } }
+</style>
+</head>
+<body>
+<div class="err-wrap">
+  <div class="err-card">
+    <div class="err-char" aria-hidden="true">
+      <!-- one office character, 16 x 18 pixels at 13x: arms folded, head shaking -->
+      <svg viewBox="0 0 16 18" xmlns="http://www.w3.org/2000/svg">
+        <!-- shadow -->
+        <rect x="3" y="17" width="10" height="1" fill="#000" opacity="0.25"/>
+        <!-- outline: every body pixel, one step out, drawn first -->
+        <g fill="#1a1c2a">
+          <rect x="3" y="1" width="10" height="9"/><rect x="2" y="8" width="12" height="8"/><rect x="3" y="13" width="3" height="5"/><rect x="10" y="13" width="3" height="5"/>
+          <rect x="1" y="9" width="2" height="5"/><rect x="13" y="9" width="2" height="5"/>
+        </g>
+        <!-- hair -->
+        <rect x="4" y="2" width="8" height="2" fill="#3b2418"/><rect x="4" y="4" width="1" height="3" fill="#3b2418"/><rect x="11" y="4" width="1" height="3" fill="#3b2418"/><rect x="5" y="2" width="2" height="1" fill="#5a3a28"/>
+        <!-- face -->
+        <rect x="5" y="4" width="6" height="5" fill="#e6b894"/>
+        <rect x="5" y="8" width="6" height="1" fill="#c99672"/>
+        <!-- eyes: a stern look -->
+        <rect x="5" y="5" width="2" height="1" fill="#1a1c2a"/><rect x="9" y="5" width="2" height="1" fill="#1a1c2a"/>
+        <rect x="5" y="6" width="2" height="1" fill="#1a1c2a"/><rect x="9" y="6" width="2" height="1" fill="#1a1c2a"/>
+        <rect x="6" y="6" width="1" height="1" fill="#fff"/><rect x="10" y="6" width="1" height="1" fill="#fff"/>
+        <!-- mouth: a flat line -->
+        <rect x="7" y="8" width="2" height="1" fill="#8a4a3a"/>
+        <!-- shirt -->
+        <rect x="3" y="9" width="10" height="6" fill="#4a9a6a"/><rect x="11" y="9" width="2" height="6" fill="#37744f"/><rect x="3" y="14" width="10" height="1" fill="#37744f"/><rect x="6" y="9" width="4" height="1" fill="#5fb883"/>
+        <!-- arms folded across the chest -->
+        <rect x="2" y="10" width="12" height="2" fill="#4a9a6a"/><rect x="2" y="12" width="12" height="1" fill="#37744f"/>
+        <rect x="3" y="11" width="3" height="2" fill="#e6b894"/><rect x="10" y="11" width="3" height="2" fill="#e6b894"/>
+        <!-- trousers and shoes -->
+        <rect x="4" y="14" width="3" height="3" fill="#2f3b58"/><rect x="9" y="14" width="3" height="3" fill="#2f3b58"/>
+        <rect x="6" y="14" width="1" height="3" fill="#222b40"/><rect x="11" y="14" width="1" height="3" fill="#222b40"/>
+        <rect x="4" y="17" width="3" height="1" fill="#1e1e1e"/><rect x="9" y="17" width="3" height="1" fill="#1e1e1e"/>
+      </svg>
+      <div class="err-bubble">No.</div>
+    </div>
+    <div class="err-text">
+      <div class="err-code">{{status}}</div>
+      <div class="err-title">{{title}}</div>
+      <div class="err-detail">{{detail}}</div>
+      <div class="err-links"><a href="/">back to the office</a></div>
+      <div class="err-foot">Agent-Master · the agents were not consulted</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

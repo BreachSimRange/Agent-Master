@@ -1,0 +1,12 @@
+[Unit]
+Description=Agent-Master editor (VS Code in the browser, code serve-web)
+After=default.target agent-master.service
+
+[Service]
+WorkingDirectory=%h
+ExecStart=/usr/bin/code serve-web --host 127.0.0.1 --port 8043 --server-base-path /code --connection-token-file %h/.config/agent-master/code-token --accept-server-license-terms --server-data-dir %h/.config/agent-master/code-server
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target
