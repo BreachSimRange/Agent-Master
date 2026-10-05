@@ -2,10 +2,14 @@
 
 Agent-Master is a self-hosted **workspace manager for AI coding agents**. Agent-Master does not run or direct the
 agents: it keeps the terminals they run in. Each workspace is a **real terminal** on your machine,
-owned by Agent-Master's own terminal server (`agent-masterd`): Claude Code looks and behaves exactly
+owned by Agent-Master's own terminal server (`agent-masterd`).
+
+Claude Code looks and behaves exactly
 as in a local terminal, keeps running when the browser or the web app goes away, and resumes its
 session after a restart, history included. You open workspaces, watch them, type into them, and
-move between them from a laptop, a phone or a console on your network, all at the same time. Each
+move between them from a laptop, a phone or a console on your network, all at the same time. 
+
+Each
 workspace is a pixel-art character in a shared office, so one glance shows who is working, blocked
 or resting; a plain shell is an egg. The agent's brain, tools and permissions stay Claude Code's own.
 
@@ -24,39 +28,44 @@ behind [BreachSimRange](https://breachsimrange.io).
   phone-friendly conversation view show the same record.
 - **Edit the code in VS Code, in the browser:** The real VS Code, served from this machine and reached
   only through Agent-Master's sign-in, opens on any workspace's folder in a new tab.
-- **A pixel office that tells the truth:** Working agents type at their desks, blocked ones raise a
+- **A pixel office for fun and quick overview:** Working agents type at their desks, blocked ones raise a
   hand, idle ones drift to the lounge and gossip about each other; shells are eggs that only peep.
 - **Everything stays on your machine:** Transcripts, events and history in local files and SQLite,
   reachable over the LAN, an SSH tunnel or a VPN, never from the internet.
 
 ## Why
 
-I wanted to run and watch a room full of AI coding agents from any device I happen to have - a
-laptop on my recliner, a phone on a walk, an SSH session from a cafe - without giving up the exact
-feel of Claude Code in a real terminal. 
-I was a fan of the Herdr project, but I still wanted a cool UI. Existing tools either buried the agents in tabs, ate
-sessions on a disconnect or shipped their conversation history off my machine. So I hacked together Agent-Master, a small self-hosted workspace manager where every agent's workspace is a real pty owned
-by a long-lived local terminal server, drawn on the UI exactly as Claude Code drew it, and
-mirrored into a pixel-art office so I can see at a glance who is working, blocked, or asleep on the
-sofa. Seems fun. Agent-Master manages the workspaces, not the workers.
+I have always wanted a simple way to get to all my vibe coding projects and workspaces from wherever I am, whether that's my laptop on the recliner, my phone, or from a cafe without giving up the exact
+feel of Claude Code in a real terminal.  Open it up, edit things remotely, and pick up right where I left off.
+
+Not a boring terminal stitched together with a few access methods that still gives you limited control and limited visibility. I have used Herdr and a few similar tools, and I really liked them, but they either buried agents in tabs, lost sessions when the connection dropped, or sent my conversation history off my machine. I wanted something simple, secure, and a little more fun to look at.
+
+So Agent-Master was born. I know, it is a lame name, but it is what it is.
+
+It is a small self-hosted workspace manager. Every agent runs in a real terminal session that stays alive on my machine, shows up exactly the way Claude Code terminal, and also lives in a little pixel-art office, so I can see at a glance who is working, who is stuck, and who is asleep on the sofa.
+
+Agent-Master manages the workspaces, not the workers. Dont let the name confuse you!
 
 It runs entirely on my hardware, stores every turn locally, and stays reachable over the LAN,
-an SSH tunnel or a VPN - never straight from the internet. Console first from a shell, browser first
-from a phone, both showing the same terminals at the same time. The office style was inspired by
+an SSH tunnel or a VPN - never straight from the internet. Console first from a shell, browser from a phone, both showing the same terminals at the same time. 
+
+I have added a few methods for accessing the Web UI securely, for local network (Both safe and unsafe) or Internet.
+
+The office style was inspired by
 the pixel-agents-hq project, and the console layout by herdr, the tool that started this whole idea.
 Have fun with Agent-Master and let us know what you think.
 
 With love, Abx
 
-**Console** - the same workspaces from any shell, locally or over SSH: a sidebar of spaces and agents,
-the live terminal beside it, Ctrl+B keys.
-
-
 
 
 <summary>More screenshots</summary>
 
+**Console view**
+
 ![The agent-master console](docs/console.png)
+
+**Here is the Web UI**
 
 ![The agent-master web UI](docs/web-ui.png)
 
