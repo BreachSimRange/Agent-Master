@@ -108,10 +108,11 @@ Works over the SSH tunnel or a VPN the same way.
 
 ## Quickstart
 
-Linux with systemd, Python 3.11+, and Claude Code installed and signed in for the same user (see
-[Requirements](#requirements)). Run the steps in this order.
+**Prerequisites:** Linux with systemd, Python 3.11+, and Claude Code installed (see
+[Requirements](#requirements)). Do every step below as your **normal user - never with `sudo`**.
+Agent-Master runs as you, under your home directory.
 
-**1. Get the code and install the Python packages.**
+**1. Get the code and install the dependencies.**
 
 ```sh
 git clone https://github.com/BreachSimRange/Agent-Master.git ~/agent-master
@@ -119,9 +120,40 @@ cd ~/agent-master
 pip install -r requirements.txt            # if pip refuses (PEP 668 on Kali/Debian 12+/Ubuntu 23.04+): add --break-system-packages
 ```
 
-**2. (Optional) Install VS Code, for editing workspaces in the browser.** Agent-Master serves the
-*real* VS Code, so the `code` command must be on your `PATH` before step 3. Skip this if you do not
-want the in-browser editor.
+**2. Sign in to Claude Code** (once). Agent-Master does not manage this login; each agent runs the real
+`claude` binary and inherits its account. Install Claude Code first if you have not
+([Anthropic's docs](https://docs.anthropic.com/en/docs/claude-code)), then:
+
+```sh
+claude                                     # the first run walks you through sign-in (Claude Pro/Max or an Anthropic Console account)
+```
+
+Credentials are saved in `~/.claude/` and every workspace reuses them (or set `ANTHROPIC_API_KEY`).
+
+**3. Install and start Agent-Master.**
+
+```sh
+./install.sh
+```
+
+This writes and starts two systemd **user** services in the right order - the terminal server
+(`agent-masterd`) first, then the web app (`agent-master`) - links the `agent-master` console command
+into `~/.local/bin/`, and enables linger so both survive a reboot. Manage them afterwards with
+`systemctl --user status|restart|stop agent-master agent-masterd` (details in [Run and configure](docs/run.md)).
+
+**4. Open it and create the account.** Open `http://127.0.0.1:3000/` on the same machine. The first
+visitor creates the account using the setup token printed in the log:
+
+```sh
+journalctl --user -u agent-master | grep 'setup token'
+```
+
+That is the whole install. The two sections below are optional.
+
+### Optional: edit workspaces in VS Code (in the browser)
+
+Agent-Master can serve the *real* VS Code in a browser tab. Install VS Code so the `code` command is on
+your `PATH`, then re-run `./install.sh` - it adds a third service (`agent-master-code`) when it finds `code`.
 
 ```sh
 # Debian / Kali / Ubuntu (official Microsoft repo); or download from https://code.visualstudio.com
@@ -130,49 +162,21 @@ sudo mkdir -p /etc/apt/keyrings
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/keyrings/packages.microsoft.gpg >/dev/null
 echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
 sudo apt-get update && sudo apt-get install -y code
-code --version                             # confirm `code` is on the PATH
+cd ~/agent-master && ./install.sh          # now adds the VS Code service (use --no-code to skip it)
 ```
 
-**3. Sign in to Claude Code**, as the same user that will run the services. Agent-Master does not
-manage this login: each agent runs the real `claude` binary and inherits its account. If Claude Code
-is not installed yet, install it first (see [Anthropic's docs](https://docs.anthropic.com/en/docs/claude-code)),
-then sign in once:
+### Alternative: run by hand, without installing anything
+
+Just want a quick look without systemd? Skip `install.sh` and run the two processes yourself in two
+shells. Nothing is installed, nothing survives a reboot, and `systemctl` does not manage them.
 
 ```sh
-claude      # the first run walks you through sign-in: a Claude Pro/Max subscription or an Anthropic Console account
+python3 ptyd.py              # shell 1: the terminal server (agent-masterd); leave it running
+./run.sh                     # shell 2: the web app on http://127.0.0.1:3000/
 ```
 
-Credentials are saved in `~/.claude/` and every workspace reuses them; you can set `ANTHROPIC_API_KEY`
-instead. Plain shells (the eggs) need no Claude login - only Claude agents do.
-
-**4. Install and start the services.** Run this as your **normal user, not with `sudo`**: these are
-systemd *user* services that live under your home directory and run as you, never as root. (Only the
-VS Code install in step 2 needs `sudo`.)
-
-```sh
-./install.sh                 # add --no-code to skip the editor service
-```
-
-`install.sh` writes and starts the systemd **user** services in the right order: the terminal server
-(`agent-masterd`) first, then the web app (`agent-master`), then VS Code in the browser
-(`agent-master-code`) when `code` is installed. It also links the `agent-master` console command to
-`~/.local/bin/` and enables linger so everything survives a reboot. Installed VS Code later? Just
-re-run `./install.sh` and it adds the editor service.
-
-**5. Open it and create the account.** Open `http://127.0.0.1:3000/` on the same machine. The first
-visitor creates the account with the setup token printed in the log:
-
-```sh
-journalctl --user -u agent-master | grep 'setup token'
-```
-
-**Without systemd (just to try it).** `run.sh` starts **only** the web app, so you must start the
-terminal server yourself first, in its own shell, or the UI comes up with "terminal server offline":
-
-```sh
-python3 ptyd.py              # terminal server (agent-masterd); leave this running
-./run.sh                     # in another shell: the web app on http://127.0.0.1:3000/
-```
+`run.sh` starts **only** the web app, so the terminal server must already be running or the UI shows
+"terminal server offline".
 
 From another device, use one of the three supported paths in [Access the UI safely](docs/access.md);
 HTTPS on your own hostname over the home LAN, a tailnet or a VPN is the usual one:
