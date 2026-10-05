@@ -105,7 +105,7 @@ Works over the SSH tunnel or a VPN the same way.
 ## Quickstart
 
 ```sh
-git clone https://github.com/<you>/agent-master.git ~/agent-master
+git clone https://github.com/BreachSimRange/Agent-Master.git ~/agent-master
 cd ~/agent-master && pip install -r requirements.txt   # if pip refuses (PEP 668): add --break-system-packages
 ./install.sh                 # writes and starts the systemd user services (terminal server, web app, VS Code if installed)
 ```
@@ -176,7 +176,7 @@ action: [Using it](docs/using.md).
   and the `agent-master` console all attach to the same pty concurrently. The screen is replayed
   on connect and the size follows whoever typed or resized last, so you can hand a task off from
   the desk to the couch without ending anything.
-- **Claude Code's own numbers**: every Claude terminal reports Claude Code's status snapshot. The
+- **Claude Code's own stats**: every Claude terminal reports Claude Code's status snapshot. The
   web UI and the console show each agent's session name, model, context used, cost, lines changed,
   prompt cache and Claude Code version, and your 5-hour and 7-day usage limits. When a newer Claude
   Code is installed than an agent runs, it says "update ready" with a one-click restart. The same
@@ -213,19 +213,19 @@ action: [Using it](docs/using.md).
   (a signed-in operator has a shell anyway; the rule keeps the address bar from being a shortcut). `~/.config/agent-master/`
   is mode 700, files 600; the terminal server has no TCP port, only an owner-only Unix socket.
 
-> **Never expose Agent-Master directly to the internet.** A signed-in operator has a shell, an editor
+> **Never expose Agent-Master directly to the internet:** A signed-in operator has a shell, an editor
 > and every agent on the machine, so the account password would be the only thing between the
 > internet and your computer. No router port forwarding, no public reverse proxy, no Tailscale Funnel
 > or Cloudflare Tunnel, no `--host 0.0.0.0` on a machine with a public address.
 >
-> **Recommended: a private network you control, plus the root certificate on every device.** Put the
+> **Recommended: a private network you control, plus the root certificate on every device:** Put the
 > machine and your devices on a tailnet (Tailscale) or your own WireGuard VPN, serve HTTPS with the
 > certificate from `make-cert.sh`, and install its root certificate on each phone, tablet and laptop
 > that will use the UI. Then only your devices can reach the port at all, every connection is
 > encrypted end to end, and a device without the root certificate cannot be tricked by a look-alike
 > server. The SSH tunnel is the equally safe choice for a single laptop.
 >
-> **Do not use it over public or untrusted Wi-Fi without that root certificate.** On a hotel, cafe,
+> **Do not use it over public or untrusted Wi-Fi without that root certificate:** On a hotel, cafe,
 > airport or office network, a plain `--host 0.0.0.0` instance or a browser that clicked through a
 > certificate warning can be intercepted. With the VPN or tunnel up and the root certificate
 > installed, an untrusted network underneath does not matter.
