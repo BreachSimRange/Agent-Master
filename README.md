@@ -8,13 +8,9 @@ Agent-Master is a self-hosted **workspace manager for AI coding agents**. Agent-
 agents: it keeps the terminals they run in. Each workspace is a **real terminal** on your machine,
 owned by Agent-Master's own terminal server (`agent-masterd`).
 
-Claude Code looks and behaves exactly
-as in a local terminal, keeps running when the browser or the web app goes away, and resumes its
-session after a restart, history included. You open workspaces, watch them, type into them, and
-move between them from a laptop, a phone or a console on your network, all at the same time. 
+Claude Code looks and behaves exactly as in a local terminal, keeps running when the browser or the web app goes away, and resumes its session after a restart, history included. You open workspaces, watch them, type into them, and move between them from a laptop, a phone or a console on your network, all at the same time. 
 
-Each
-workspace is a pixel-art character in a shared office, so one glance shows who is working, blocked
+Each workspace is a pixel-art character in a shared office, so one glance shows who is working, blocked
 or resting; a plain shell is an egg. The agent's brain, tools and permissions stay Claude Code's own.
 
 Agent-Master, hacked together by Abx ([Abhijith B R](https://www.linkedin.com/in/abhijith-b-r/)), the people
@@ -22,19 +18,19 @@ behind [BreachSimRange](https://breachsimrange.io).
 
 **At a glance**
 
-- **Real terminals that never die:** One pty per workspace, owned by a small local daemon. Close the
+**Real terminals that never die:** One pty per workspace, owned by a small local daemon. Close the
   browser, restart the web app, reboot: the agent keeps running or comes back with `--resume`.
-- **The same terminal on every screen at once:** Laptop, phone, tablet and the `agent-master` console
+**The same terminal on every screen at once:** Laptop, phone, tablet and the `agent-master` console
   in any shell all attach to the same pty; the size follows whoever is using it.
-- **The whole history in the terminal:** Scroll up and the conversation is there, read from Claude
+**The whole history in the terminal:** Scroll up and the conversation is there, read from Claude
   Code's own transcript, page by page as you go: this session back to its first prompt, then the
   folder's earlier sessions behind it, with a seam line where one ended. A page view and a
   phone-friendly conversation view show the same record.
-- **Edit the code in VS Code, in the browser:** The real VS Code, served from this machine and reached
+**Edit the code in VS Code, in the browser:** The real VS Code, served from this machine and reached
   only through Agent-Master's sign-in, opens on any workspace's folder in a new tab.
-- **A pixel office for fun and quick overview:** Working agents type at their desks, blocked ones raise a
+**A pixel office for fun and quick overview:** Working agents type at their desks, blocked ones raise a
   hand, idle ones drift to the lounge and gossip about each other; shells are eggs that only peep.
-- **Everything stays on your machine:** Transcripts, events and history in local files and SQLite,
+**Everything stays on your machine:** Transcripts, events and history in local files and SQLite,
   reachable over the LAN, an SSH tunnel or a VPN, never from the internet.
 
 ## Why
